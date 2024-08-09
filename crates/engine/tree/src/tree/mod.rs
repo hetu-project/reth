@@ -620,7 +620,8 @@ where
             }
         };
 
-        let block_hash = block.hash();
+        let block_num_hash = block.num_hash();
+        let block_hash = block_num_hash.hash;
         let mut lowest_buffered_ancestor = self.lowest_buffered_ancestor_or(block_hash);
         if lowest_buffered_ancestor == block_hash {
             lowest_buffered_ancestor = block.parent_hash;
@@ -646,6 +647,7 @@ where
                     let status = match status {
                         InsertPayloadOk::Inserted(BlockStatus::Valid(_)) |
                         InsertPayloadOk::AlreadySeen(BlockStatus::Valid(_)) => {
+                            self.try_connect_buffered_blocks(block_num_hash);
                             latest_valid_hash = Some(block_hash);
                             PayloadStatusEnum::Valid
                         }
@@ -2299,6 +2301,27 @@ mod tests {
         fn check_canon_head(&self, head_hash: B256) {
             assert_eq!(self.tree.state.tree_state.canonical_head().hash, head_hash);
         }
+
+        async fn send_new_payload(
+            &mut self,
+            block: SealedBlock,
+            payload_status: PayloadStatusEnum,
+        ) {
+            let payload: ExecutionPayload = block_to_payload_v1(block).into();
+
+            let (tx, rx) = oneshot::channel();
+            self.tree.on_engine_message(FromEngine::Request(EngineApiRequest::Beacon(
+                BeaconEngineMessage::NewPayload { payload, cancun_fields: None, tx },
+            )));
+
+            let response = rx.await.unwrap().unwrap();
+            match payload_status {
+                PayloadStatusEnum::Valid => assert!(response.is_valid()),
+                PayloadStatusEnum::Invalid { .. } => assert!(response.is_invalid()),
+                PayloadStatusEnum::Syncing => assert!(response.is_syncing()),
+                PayloadStatusEnum::Accepted => {}
+            }
+        }
     }
 
     #[test]
@@ -3026,5 +3049,45 @@ mod tests {
 
         // verify the new canonical head
         test_harness.check_canon_head(chain_b_tip_hash);
+    }
+
+    #[tokio::test]
+    async fn test_engine_tree_connect_downloaded_blocks_on_new_payload() {
+        reth_tracing::init_test_tracing();
+
+        let chain_spec = MAINNET.clone();
+        let mut test_harness = TestHarness::new(chain_spec.clone());
+
+        // create base chain and setup test harness with it
+        let base_chain: Vec<_> = test_harness.block_builder.get_executed_blocks(0..1).collect();
+        test_harness = test_harness.with_blocks(base_chain.clone());
+
+        // fcu to the tip of base chain
+        test_harness
+            .fcu_to(base_chain.last().unwrap().block().hash(), ForkchoiceStatus::Valid)
+            .await;
+
+        // create main chain, extension of base chain
+        let main_chain = test_harness.block_builder.create_fork(base_chain[0].block(), 2);
+
+        let main_last = main_chain.last().unwrap();
+        let main_last_hash = main_last.hash();
+        let main_first = main_chain.first().unwrap();
+        let main_first_hash = main_first.hash();
+        debug!("main_first_hash: {main_first_hash}, main_last_hash: {main_last_hash}");
+
+        // insert disconnected block from main chain
+        test_harness.insert_block(main_last.clone()).unwrap();
+
+        // send fcu to buffered block
+        test_harness.send_fcu(main_last_hash, ForkchoiceStatus::Syncing).await;
+        test_harness.check_fcu(main_last_hash, ForkchoiceStatus::Syncing).await;
+
+        // send new payload with first block in main chain
+        test_harness.setup_range_insertion_for_chain(vec![main_first.clone()]);
+        test_harness.send_new_payload(main_first.block.clone(), PayloadStatusEnum::Valid).await;
+
+        // check that the new block has been added
+        test_harness.check_canon_chain_insertion(vec![main_first.clone()]).await;
     }
 }
