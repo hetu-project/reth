@@ -194,6 +194,8 @@ impl HeaderProvider for MockEthProvider {
 }
 
 impl ChainSpecProvider for MockEthProvider {
+    type ChainSpec = ChainSpec;
+
     fn chain_spec(&self) -> Arc<ChainSpec> {
         self.chain_spec.clone()
     }
