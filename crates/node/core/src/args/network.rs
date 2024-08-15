@@ -97,7 +97,7 @@ pub struct NetworkArgs {
     #[arg(long)]
     pub max_inbound_peers: Option<usize>,
 
-    ///  Max concurrent `GetPooledTransactions` requests per peer.
+    /// Max concurrent `GetPooledTransactions` requests per peer.
     #[arg(long = "max-tx-reqs-peer", value_name = "MAX_TX_REQS_PEER", default_value_t = DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS_PER_PEER, verbatim_doc_comment)]
     pub max_concurrent_tx_requests_per_peer: u8,
 
