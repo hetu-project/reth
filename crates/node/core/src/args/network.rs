@@ -12,6 +12,7 @@ use reth_discv5::{
 use reth_net_nat::NatResolver;
 use reth_network::{
     transactions::{
+        constants::tx_fetcher::DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS_PER_PEER,
         TransactionFetcherConfig, TransactionsManagerConfig,
         DEFAULT_SOFT_LIMIT_BYTE_SIZE_POOLED_TRANSACTIONS_RESP_ON_PACK_GET_POOLED_TRANSACTIONS_REQ,
         SOFT_LIMIT_BYTE_SIZE_POOLED_TRANSACTIONS_RESPONSE,
@@ -96,6 +97,10 @@ pub struct NetworkArgs {
     #[arg(long)]
     pub max_inbound_peers: Option<usize>,
 
+    ///  Max concurrent `GetPooledTransactions` requests per peer.
+    #[arg(long = "max-tx-reqs-peer", value_name = "MAX_TX_REQS_PEER", default_value_t = DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS_PER_PEER, verbatim_doc_comment)]
+    pub max_concurrent_tx_requests_per_peer: u8,
+
     /// Experimental, for usage in research. Sets the max accumulated byte size of transactions
     /// to pack in one response.
     /// Spec'd at 2MiB.
@@ -158,6 +163,7 @@ impl NetworkArgs {
         // Configure transactions manager
         let transactions_manager_config = TransactionsManagerConfig {
             transaction_fetcher_config: TransactionFetcherConfig::new(
+                self.max_concurrent_tx_requests_per_peer,
                 self.soft_limit_byte_size_pooled_transactions_response,
                 self.soft_limit_byte_size_pooled_transactions_response_on_pack_request,
             ),
@@ -258,6 +264,7 @@ impl Default for NetworkArgs {
             port: DEFAULT_DISCOVERY_PORT,
             max_outbound_peers: None,
             max_inbound_peers: None,
+            max_concurrent_tx_requests_per_peer: DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS_PER_PEER,
             soft_limit_byte_size_pooled_transactions_response:
                 SOFT_LIMIT_BYTE_SIZE_POOLED_TRANSACTIONS_RESPONSE,
             soft_limit_byte_size_pooled_transactions_response_on_pack_request: DEFAULT_SOFT_LIMIT_BYTE_SIZE_POOLED_TRANSACTIONS_RESP_ON_PACK_GET_POOLED_TRANSACTIONS_REQ,

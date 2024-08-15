@@ -154,6 +154,9 @@ Networking:
       --max-inbound-peers <MAX_INBOUND_PEERS>
           Maximum number of inbound requests. default: 30
 
+      --max-tx-reqs-peer <MAX_TX_REQS_PEER>
+          Max concurrent `GetPooledTransactions` requests per peer.
+
       --pooled-tx-response-soft-limit <BYTES>
           Experimental, for usage in research. Sets the max accumulated byte size of transactions
           to pack in one response.

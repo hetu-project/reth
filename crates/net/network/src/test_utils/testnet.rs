@@ -299,7 +299,7 @@ impl<C, Pool> TestnetHandle<C, Pool> {
     /// Returns once all sessions are established.
     pub async fn connect_peers(&self) {
         if self.peers.len() < 2 {
-            return
+            return;
         }
 
         // add an event stream for _each_ peer
@@ -629,7 +629,7 @@ impl NetworkEventStream {
     /// Awaits the next `num` events for an established session
     pub async fn take_session_established(&mut self, mut num: usize) -> Vec<PeerId> {
         if num == 0 {
-            return Vec::new()
+            return Vec::new();
         }
         let mut peers = Vec::with_capacity(num);
         while let Some(ev) = self.inner.next().await {
@@ -638,7 +638,7 @@ impl NetworkEventStream {
                     peers.push(peer_id);
                     num -= 1;
                     if num == 0 {
-                        return peers
+                        return peers;
                     }
                 }
                 _ => continue,

@@ -352,7 +352,7 @@ where
         if let Some(peer) = self.peers.get_mut(&peer_id) {
             if self.network.tx_gossip_disabled() {
                 let _ = response.send(Ok(PooledTransactions::default()));
-                return
+                return;
             }
             let transactions = self.pool.get_pooled_transaction_elements(
                 request.0,
@@ -386,10 +386,10 @@ where
     fn on_new_pending_transactions(&mut self, hashes: Vec<TxHash>) {
         // Nothing to propagate while initially syncing
         if self.network.is_initially_syncing() {
-            return
+            return;
         }
         if self.network.tx_gossip_disabled() {
-            return
+            return;
         }
 
         trace!(target: "net::tx", num_hashes=?hashes.len(), "Start propagating transactions");
@@ -416,7 +416,7 @@ where
     ) -> PropagatedTransactions {
         let mut propagated = PropagatedTransactions::default();
         if self.network.tx_gossip_disabled() {
-            return propagated
+            return propagated;
         }
 
         // send full transactions to a fraction of the connected peers (square root of the total
@@ -445,7 +445,7 @@ where
 
             if builder.is_empty() {
                 trace!(target: "net::tx", ?peer_id, "Nothing to propagate to peer; has seen all transactions");
-                continue
+                continue;
             }
 
             let PropagateTransactions { pooled, full } = builder.build();
@@ -517,7 +517,7 @@ where
 
         if full_transactions.is_empty() {
             // nothing to propagate
-            return None
+            return None;
         }
 
         let PropagateTransactions { pooled, full } = full_transactions.build();
@@ -561,7 +561,7 @@ where
         let propagated = {
             let Some(peer) = self.peers.get_mut(&peer_id) else {
                 // no such peer
-                return
+                return;
             };
 
             let to_propagate: Vec<PropagateTransaction> =
@@ -582,7 +582,7 @@ where
 
             if new_pooled_hashes.is_empty() {
                 // nothing to propagate
-                return
+                return;
             }
 
             for hash in new_pooled_hashes.iter_hashes().copied() {
@@ -612,10 +612,10 @@ where
     ) {
         // If the node is initially syncing, ignore transactions
         if self.network.is_initially_syncing() {
-            return
+            return;
         }
         if self.network.tx_gossip_disabled() {
-            return
+            return;
         }
 
         // get handle to peer's session, if the session is still active
@@ -626,7 +626,7 @@ where
                 "discarding announcement from inactive peer"
             );
 
-            return
+            return;
         };
         let client = peer.client_version.clone();
 
@@ -687,7 +687,7 @@ where
 
         if partially_valid_msg.is_empty() {
             // nothing to request
-            return
+            return;
         }
 
         // 4. filter out invalid entries (spam)
@@ -716,7 +716,7 @@ where
 
         if valid_announcement_data.is_empty() {
             // no valid announcement data
-            return
+            return;
         }
 
         // 5. filter out already seen unknown hashes
@@ -736,7 +736,7 @@ where
 
         if valid_announcement_data.is_empty() {
             // nothing to request
-            return
+            return;
         }
 
         trace!(target: "net::tx::propagation",
@@ -765,7 +765,7 @@ where
 
             self.transaction_fetcher.buffer_hashes(hashes, Some(peer_id));
 
-            return
+            return;
         }
 
         // load message version before announcement data type is destructed in packing
@@ -917,7 +917,7 @@ where
                 // `SOFT_LIMIT_COUNT_HASHES_IN_NEW_POOLED_TRANSACTIONS_BROADCAST_MESSAGE`
                 // transactions in the pool.
                 if self.network.is_initially_syncing() || self.network.tx_gossip_disabled() {
-                    return
+                    return;
                 }
 
                 let pooled_txs = self.pool.pooled_transactions_max(
@@ -925,7 +925,7 @@ where
                 );
                 if pooled_txs.is_empty() {
                     // do not send a message if there are no transactions in the pool
-                    return
+                    return;
                 }
 
                 let mut msg_builder = PooledTransactionsHashesBuilder::new(version);
@@ -950,10 +950,10 @@ where
     ) {
         // If the node is pipeline syncing, ignore transactions
         if self.network.is_initially_syncing() {
-            return
+            return;
         }
         if self.network.tx_gossip_disabled() {
-            return
+            return;
         }
 
         let Some(peer) = self.peers.get_mut(&peer_id) else { return };
@@ -1003,7 +1003,7 @@ where
                             "failed ecrecovery for transaction"
                         );
                         has_bad_transactions = true;
-                        continue
+                        continue;
                     }
                 };
 
@@ -1141,7 +1141,7 @@ where
             RequestError::Timeout => ReputationChangeKind::Timeout,
             RequestError::ChannelClosed | RequestError::ConnectionDropped => {
                 // peer is already disconnected
-                return
+                return;
             }
             RequestError::BadResponse => return self.report_peer_bad_transactions(peer_id),
         };
@@ -1186,7 +1186,7 @@ where
 
         // if we're _currently_ syncing, we ignore a bad transaction
         if !err.is_bad_transaction() || self.network.is_syncing() {
-            return
+            return;
         }
         // otherwise we penalize the peer that sent the bad transaction, with the assumption that
         // the peer should have known that this transaction is bad (e.g. violating consensus rules)
@@ -1362,7 +1362,7 @@ where
         {
             // make sure we're woken up again
             cx.waker().wake_by_ref();
-            return Poll::Pending
+            return Poll::Pending;
         }
 
         this.update_poll_metrics(start, poll_durations);
@@ -1492,7 +1492,7 @@ impl FullTransactionsBuilder {
         // From: <https://eips.ethereum.org/EIPS/eip-4844#networking>
         if transaction.transaction.is_eip4844() {
             self.pooled.push(transaction);
-            return
+            return;
         }
 
         let new_size = self.total_size + transaction.size;
@@ -1501,7 +1501,7 @@ impl FullTransactionsBuilder {
         {
             // transaction does not fit into the message
             self.pooled.push(transaction);
-            return
+            return;
         }
 
         self.total_size = new_size;
