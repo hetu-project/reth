@@ -186,13 +186,7 @@ impl TransactionFetcher {
         let TxFetchMetadata { fallback_peers, .. } =
             self.hashes_fetch_inflight_and_pending_fetch.peek(&hash)?;
 
-        for peer_id in fallback_peers.iter() {
-            if self.is_idle(peer_id) && is_session_active(peer_id) {
-                return Some(peer_id);
-            }
-        }
-
-        None
+        fallback_peers.iter().find(|&peer_id| self.is_idle(peer_id) && is_session_active(peer_id))
     }
 
     /// Returns any idle peer for any hash pending fetch. If one is found, the corresponding
@@ -1323,7 +1317,7 @@ impl Default for TransactionFetcherInfo {
     fn default() -> Self {
         Self::new(
             DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS as usize,
-            DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS_PER_PEER as u8,
+            DEFAULT_MAX_COUNT_CONCURRENT_REQUESTS_PER_PEER,
             DEFAULT_SOFT_LIMIT_BYTE_SIZE_POOLED_TRANSACTIONS_RESP_ON_PACK_GET_POOLED_TRANSACTIONS_REQ,
             SOFT_LIMIT_BYTE_SIZE_POOLED_TRANSACTIONS_RESPONSE
         )
