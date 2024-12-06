@@ -7701,6 +7701,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "reth-narwhal-consensus"
+version = "1.1.1"
+
+[[package]]
 name = "reth-net-banlist"
 version = "1.1.1"
 dependencies = [
