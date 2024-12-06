@@ -147,7 +147,7 @@ members = [
     "examples/txpool-tracing/",
     "examples/custom-beacon-withdrawals",
     "testing/ef-tests/",
-    "testing/testing-utils", "crates/consensus/narwhal",
+    "testing/testing-utils", "crates/consensus/narwhal", "examples/narwhal-mode",
 ]
 default-members = ["bin/reth"]
 exclude = ["book/sources"]
