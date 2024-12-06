@@ -120,6 +120,9 @@ where
                 let events = this.pipe_line_events.take();
                 let executor = this.block_executor.clone();
 
+                // Todo: Transmit txns to narwhal consensus in narwhal tag
+
+
                 // Create the mining future that creates a block, notifies the engine that drives
                 // the pipeline
                 this.insert_task = Some(Box::pin(async move {

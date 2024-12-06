@@ -30,6 +30,13 @@ reth-network-peers.workspace = true
 reth-tokio-util.workspace = true
 reth-trie.workspace = true
 
+
+# ethereum
+alloy-eips.workspace = true
+alloy-primitives.workspace = true
+revm-primitives.workspace = true
+alloy-rpc-types-engine.workspace = true
+
 # ethereum
 # alloy.workspace = true
 # alloy-signer.workspace = true
