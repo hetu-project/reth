@@ -348,6 +348,11 @@ impl<R, ChainSpec: EthChainSpec> LaunchContextWith<Attached<WithConfigs<ChainSpe
         self.node_config().chain.chain()
     }
 
+    /// Returns true if the node is configured as --narwhal
+    pub const fn is_narwhal(&self) -> bool {
+        self.node_config().narwhal.narwhal
+    }
+
     /// Returns true if the node is configured as --dev
     pub const fn is_dev(&self) -> bool {
         self.node_config().dev.dev

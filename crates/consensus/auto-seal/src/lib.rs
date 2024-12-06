@@ -104,6 +104,7 @@ impl<ChainSpec: Send + Sync + Debug> Consensus for AutoSealConsensus<ChainSpec> 
 /// Builder type for configuring the setup
 #[derive(Debug)]
 pub struct AutoSealBuilder<Client, Pool, Engine: EngineTypes, EvmConfig, ChainSpec> {
+    is_narwhal: bool,
     client: Client,
     consensus: AutoSealConsensus<ChainSpec>,
     pool: Pool,
@@ -125,6 +126,7 @@ where
 {
     /// Creates a new builder instance to configure all parts.
     pub fn new(
+        is_narwhal: bool,
         chain_spec: Arc<ChainSpec>,
         client: Client,
         pool: Pool,
@@ -137,6 +139,7 @@ where
         });
 
         Self {
+            is_narwhal,
             storage: Storage::new(latest_header),
             client,
             consensus: AutoSealConsensus::new(chain_spec),
@@ -162,9 +165,10 @@ where
         AutoSealClient,
         MiningTask<Client, Pool, EvmConfig, Engine, ChainSpec>,
     ) {
-        let Self { client, consensus, pool, mode, storage, to_engine, evm_config } = self;
+        let Self {is_narwhal, client, consensus, pool, mode, storage, to_engine, evm_config } = self;
         let auto_client = AutoSealClient::new(storage.clone());
         let task = MiningTask::new(
+            is_narwhal,
             Arc::clone(&consensus.chain_spec),
             mode,
             to_engine,

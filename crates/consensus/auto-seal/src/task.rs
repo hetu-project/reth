@@ -21,6 +21,8 @@ use tracing::{debug, error, warn};
 
 /// A Future that listens for new ready transactions and puts new blocks into storage
 pub struct MiningTask<Client, Pool: TransactionPool, Executor, Engine: EngineTypes, ChainSpec> {
+    /// Current consensus mode is narwhal mode
+    is_narwhal: bool,
     /// The configured chain spec
     chain_spec: Arc<ChainSpec>,
     /// The client used to interact with the state
@@ -51,6 +53,7 @@ impl<Executor, Client, Pool: TransactionPool, Engine: EngineTypes, ChainSpec>
     /// Creates a new instance of the task
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
+        is_narwhal: bool,
         chain_spec: Arc<ChainSpec>,
         miner: MiningMode,
         to_engine: UnboundedSender<BeaconEngineMessage<Engine>>,
@@ -60,6 +63,7 @@ impl<Executor, Client, Pool: TransactionPool, Engine: EngineTypes, ChainSpec>
         block_executor: Executor,
     ) -> Self {
         Self {
+            is_narwhal,
             chain_spec,
             client,
             miner,

@@ -222,6 +222,7 @@ where
             info!(target: "reth::cli", mode=%mining_mode, "configuring dev mining mode");
 
             let (_, client, mut task) = reth_auto_seal_consensus::AutoSealBuilder::new(
+                ctx.is_narwhal(),
                 ctx.chain_spec(),
                 ctx.blockchain_db().clone(),
                 ctx.components().pool().clone(),
