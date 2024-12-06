@@ -2,7 +2,7 @@
 
 use crate::{
     args::{
-        DatabaseArgs, DatadirArgs, DebugArgs, DevArgs, NetworkArgs, PayloadBuilderArgs,
+        DatabaseArgs, DatadirArgs, DebugArgs, DevArgs, NarwhalArgs, NetworkArgs, PayloadBuilderArgs,
         PruningArgs, RpcServerArgs, TxPoolArgs,
     },
     dirs::{ChainPath, DataDirPath},
@@ -126,6 +126,9 @@ pub struct NodeConfig<ChainSpec> {
     /// All dev related arguments with --dev prefix
     pub dev: DevArgs,
 
+    /// All narwhal related arguments with --narwhal prefix
+    pub narwhal: NarwhalArgs,
+
     /// All pruning related arguments
     pub pruning: PruningArgs,
 }
@@ -154,6 +157,7 @@ impl<ChainSpec> NodeConfig<ChainSpec> {
             debug: DebugArgs::default(),
             db: DatabaseArgs::default(),
             dev: DevArgs::default(),
+            narwhal: NarwhalArgs::default(),
             pruning: PruningArgs::default(),
             datadir: DatadirArgs::default(),
         }
@@ -173,6 +177,25 @@ impl<ChainSpec> NodeConfig<ChainSpec> {
     pub const fn set_dev(self, dev: bool) -> Self {
         if dev {
             self.dev()
+        } else {
+            self
+        }
+    }
+
+    /// Sets --narwhal mode for the node.
+    /// 
+    /// In addition to setting the `--narwhal` flag, this also:
+    /// - disables discovery in [`NetworkArgs`].
+    pub const fn narwhal(mut self) -> Self {
+        self.narwhal.narwhal = true;
+        self.network.discovery.disable_discovery = true;
+        self
+    }
+
+    /// Sets --narwhal mode for the node [`NodeConfig::narwhal`], if `narwhal` is true.
+    pub const fn set_narwhal(self, narwhal: bool) -> Self {
+        if narwhal {
+            self.narwhal()
         } else {
             self
         }
@@ -247,6 +270,12 @@ impl<ChainSpec> NodeConfig<ChainSpec> {
     /// Set the dev args for the node
     pub const fn with_dev(mut self, dev: DevArgs) -> Self {
         self.dev = dev;
+        self
+    }
+
+    /// Set the narwhal args for the node
+    pub const fn with_narwhal(mut self, narwhal: NarwhalArgs) -> Self {
+        self.narwhal = narwhal;
         self
     }
 
@@ -443,6 +472,7 @@ impl<ChainSpec> NodeConfig<ChainSpec> {
             debug: self.debug,
             db: self.db,
             dev: self.dev,
+            narwhal: self.narwhal,
             pruning: self.pruning,
         }
     }
@@ -468,6 +498,7 @@ impl<ChainSpec> Clone for NodeConfig<ChainSpec> {
             debug: self.debug.clone(),
             db: self.db,
             dev: self.dev,
+            narwhal: self.narwhal,
             pruning: self.pruning.clone(),
             datadir: self.datadir.clone(),
         }

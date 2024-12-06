@@ -300,6 +300,7 @@ overflow-checks = true
 op-reth = { path = "crates/optimism/bin" }
 reth = { path = "bin/reth" }
 reth-auto-seal-consensus = { path = "crates/consensus/auto-seal" }
+reth-narwhal-consensus = {path = "crates/consensus/narwhal" }
 reth-basic-payload-builder = { path = "crates/payload/basic" }
 reth-beacon-consensus = { path = "crates/consensus/beacon" }
 reth-bench = { path = "bin/reth-bench" }

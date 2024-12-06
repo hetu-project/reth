@@ -31,14 +31,14 @@ reth-tokio-util.workspace = true
 reth-trie.workspace = true
 
 # ethereum
-alloy.workspace = true
-alloy-signer.workspace = true
-alloy-rpc-client.workspace = true
-alloy-eips.workspace = true
-alloy-signer-local.workspace = true
-alloy-primitives.workspace = true
-alloy-rpc-types-engine.workspace = true
-revm-primitives.workspace = true
+# alloy.workspace = true
+# alloy-signer.workspace = true
+# alloy-rpc-client.workspace = true
+# alloy-eips.workspace = true
+# alloy-signer-local.workspace = true
+# alloy-primitives.workspace = true
+# alloy-rpc-types-engine.workspace = true
+# revm-primitives.workspace = true
 
 # optimism
 reth-optimism-consensus = { workspace = true, optional = true }
